@@ -2,8 +2,9 @@ import React, { useState } from "react";
 
 export default function SearchBar(props) {
 
-    const [cityName, setCityName] = React.useState("");
+    const [cityName, setCityName] = useState("");
     const [units, setUnits] = useState('metric')
+    const {lat, lon} = props
 
     /**
      * 
@@ -12,7 +13,14 @@ export default function SearchBar(props) {
 
     async function submitHandler(ev) {
         ev.preventDefault()
-        props.getWeatherByCity(cityName, units)
+        props.getWeatherByLocation({cityName, lat, lon}, units)
+    }
+
+    async function radioChangeHandler (ev) {
+        setUnits(() => {
+          props.getWeatherByLocation({cityName, lat, lon}, ev.target.value)
+          return ev.target.value
+        })
     }
 
 
@@ -29,13 +37,13 @@ export default function SearchBar(props) {
             <div className="mb-4 pb-2">
                 <div className="form-check form-check-inline">
                     <input className="form-check-input celcius" type="radio" name="inlineRadioOptions"
-                        id="inlineRadio1" value="metric" defaultChecked onClick={(ev) => setUnits(ev.target.value)} />
+                        id="inlineRadio1" value="metric" defaultChecked onClick={radioChangeHandler} />
                     <label className="form-check-label" htmlFor='inlineRadio1'>Celsius</label>
                 </div>
 
                 <div className="form-check form-check-inline">
                     <input className="form-check-input farenheit" type="radio" name="inlineRadioOptions"
-                        id="inlineRadio2" value="imperial" onClick={(ev) => setUnits(ev.target.value)}/>
+                        id="inlineRadio2" value="imperial" onClick={radioChangeHandler}/>
                     <label className="form-check-label" htmlFor="inlineRadio2">Farenheit</label>
                 </div>
             </div>

@@ -13,30 +13,39 @@ export default class App extends React.Component {
     super(props)
     this.state = {
       weather: null,
-      units: 'metric'
+      units: 'metric',
+      lat: null,
+      lon: null
     }
+    this.getWeatherByLocation = this.getWeatherByLocation.bind(this)
   }
 
   componentDidMount() {
     document.title = 'Weather Web';
     navigator.geolocation.getCurrentPosition(async position => {
-      const weather = await WeatherApiService.getWeatherByLocation(position.coords.latitude, position.coords.longitude, this.state.units)
+      const { latitude: lat, longitude: lon } = position.coords
+      this.setState({
+        lat,
+        lon
+      })
+      const weather = await WeatherApiService.getWeatherByLocation({ lat, lon }, this.state.units)
       this.setState({
         weather
       })
     })
   }
 
-  async getWeatherByCity(city, units) {
+  async getWeatherByLocation(queryObj, units) {
     this.setState({
       weather: null
     })
     try {
-      const weather = await WeatherApiService.getWeatherByCity(city, units)
+      const weather = await WeatherApiService.getWeatherByLocation(queryObj, units)
       this.setState({
         weather,
         units
       })
+      console.log({weather})
     } catch (e) {
       this.setState({
         weather: e.message,
@@ -58,7 +67,7 @@ export default class App extends React.Component {
 
                 <h3 className="mb-4 pb-2 fw-normal">Check the weather forecast</h3>
 
-                <SearchBar getWeatherByCity={this.getWeatherByCity.bind(this)} />
+                <SearchBar getWeatherByLocation={this.getWeatherByLocation} lat={this.state.lat} lon={this.state.lon} />
 
                 {
                   this.state.weather instanceof Object ?
